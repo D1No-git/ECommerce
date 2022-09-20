@@ -40,7 +40,7 @@ namespace ECommerce.Api.Products.Providers
             }
         }
 
-        public async Task<(bool isSuccess, IEnumerable<Models.Product> Products, string ErrorMessage)> GetProductsAsync()
+        public async Task<(bool isSuccess, IEnumerable<Product> Products, string ErrorMessage)> GetProductsAsync()
         {
             try
             {
@@ -48,7 +48,7 @@ namespace ECommerce.Api.Products.Providers
 
                 if (!(products == null || !products.Any()))
                 {
-                    var result = mapper.Map<IEnumerable<Db.Product>, IEnumerable<Models.Product>>(products);
+                    var result = mapper.Map<IEnumerable<Db.Product>, IEnumerable<Product>>(products);
                     return (true, result, null);
                 }
 
@@ -57,7 +57,27 @@ namespace ECommerce.Api.Products.Providers
             catch (Exception ex)
             {
                 logger?.LogError(ex.ToString());
+                return (false, null, ex.Message);
+            }
+        }
 
+        public async Task<(bool isSuccess, Product Product, string ErrorMessage)> GetProductAsync(int id)
+        {
+            try
+            {
+                var product = await dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
+
+                if (product != null)
+                {
+                    var result = mapper.Map<Db.Product, Product>(product);
+                    return (true, result, null);
+                }
+
+                return (false, null, "Not found");
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex.ToString());
                 return (false, null, ex.Message);
             }
         }
